@@ -11,6 +11,7 @@ Vue.component('app-header', {
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
+            <router-link class="nav-link" to="/upload">Upload <span class="sr-only">(current)</span></router-link>
           </li>
         </ul>
       </div>
@@ -40,6 +41,35 @@ const Home = Vue.component('home', {
     }
 });
 
+
+const UploadForm = Vue.component('upload-form', {
+   template: `
+    <form @submit.prevent="uploadPhoto" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="phoyo" id="photo">
+    <input type="submit" value="Upload Image" name="submit">
+</form>
+   `,
+           methods: {         
+            uploadPhoto: function() { 
+     fetch("/api/upload", {     method: 'POST' }).then(
+         function (response) {         
+         return response.json(); 
+         })     
+         .then(function (jsonResponse) {        
+             // display a success message         
+             alert(jsonResponse); 
+    })     .catch(function (error) {         
+        console.log(error);     });      
+                
+            }     
+            
+        } ,
+    data: function() {
+       return {}
+    }
+});
+
 const NotFound = Vue.component('not-found', {
     template: `
     <div>
@@ -57,7 +87,7 @@ const router = new VueRouter({
     routes: [
         {path: "/", component: Home},
         // Put other routes here
-
+ {path: "/upload", component: UploadForm},
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
     ]

@@ -4,20 +4,23 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-
+import os
 from app import app
-from flask import render_template, request
+from flask import Flask,render_template, request
+from flask_uploads import configure_uploads, IMAGES, UploadSet
+from .forms import UploadForm
+from werkzeug.utils import secure_filename
+from flask import jsonify
 
-###
-# Routing for your application.
-###
-
+images = UploadSet('images',IMAGES)
+configure_uploads(app,images)
 
 # Please create all new routes and view functions above this route.
 # This route is now our catch all route for our VueJS single page
 # application.
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
+
 def index(path):
     """
     Because we use HTML5 history mode in vue-router we need to configure our
@@ -49,6 +52,19 @@ def form_errors(form):
 # The functions below should be applicable to all Flask apps.
 ###
 
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    photoform=UploadForm()
+    if request.method == 'POST':
+        photo = photoform.photo.data # we could also use request.files['photo']
+        description = photoform.description.data
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(
+            app.config['UPLOAD_FOLDER'], photo.filename
+        ))
+        return "Validated"
+    return "Form not validated"
+    
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):
